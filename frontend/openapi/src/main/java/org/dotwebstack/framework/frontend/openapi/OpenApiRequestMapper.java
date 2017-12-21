@@ -154,36 +154,6 @@ class OpenApiRequestMapper implements ResourceLoaderAware, EnvironmentAware {
       Map<MediaType, Property> schemaMap =
           produces.stream().collect(Collectors.toMap(MediaType::valueOf, mediaType -> property));
 
-      schemaMap.entrySet().forEach(
-          e -> LOG.error("SchemaMap = Mediatype: {}, property: {}, extensions: {}", e.getKey(),
-              e.getValue().getDescription(), e.getValue().getVendorExtensions()));
-
-      String notFoundStatusCode = Integer.toString(Status.NOT_FOUND.getStatusCode());
-
-
-      if (getOperation.getResponses().containsKey(notFoundStatusCode)) {
-
-        LOG.error("Vendor stuff via apiOperation: {}",
-            apiOperation.getOperation().getResponses().get(
-                notFoundStatusCode).getVendorExtensions());
-
-        Response notFound = getOperation.getResponses().get(notFoundStatusCode);
-        if (notFound.getSchema() == null) {
-          LOG.error("Resource {} does not specify a schema for the status {} response");
-        } else {
-          Property prop = new ResponseProperty(notFound);
-
-          Map<MediaType, Property> schemaMap2 =
-              produces.stream().collect(Collectors.toMap(MediaType::valueOf, mediaType -> prop));
-
-          schemaMap2.entrySet().forEach(
-              e -> LOG.error("SchemaMap2 = Mediatype: {}, property: {}, extensions: {}", e.getKey(),
-                  e.getValue().getDescription(), e.getValue().getVendorExtensions()));
-
-        }
-      }
-
-
       IRI informationProductIdentifier =
           valueFactory.createIRI((String) getOperation.getVendorExtensions().get(
               OpenApiSpecificationExtensions.INFORMATION_PRODUCT));

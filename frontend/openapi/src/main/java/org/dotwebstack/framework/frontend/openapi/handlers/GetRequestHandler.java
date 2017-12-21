@@ -71,9 +71,11 @@ public final class GetRequestHandler implements Inflector<ContainerRequestContex
     if (ResultType.TUPLE.equals(informationProduct.getResultType())) {
 
       TupleQueryResult result = (TupleQueryResult) informationProduct.getResult(parameterValues);
+
       if (!result.hasNext() && hasIfEmptyOrNullVendorExtension()) {
         return Response.status(Status.NOT_FOUND).build();
       }
+
       TupleEntity entity =
           TupleEntity.builder().withQueryResult(result).withSchemaMap(schemaMap).build();
 
@@ -82,6 +84,18 @@ public final class GetRequestHandler implements Inflector<ContainerRequestContex
     if (ResultType.GRAPH.equals(informationProduct.getResultType())) {
       org.eclipse.rdf4j.query.GraphQueryResult result =
           (org.eclipse.rdf4j.query.GraphQueryResult) informationProduct.getResult(parameterValues);
+
+      // result.hasNext() doesn't give an empty result set for a query to a non-existent resource
+      // ...
+      // LOG.error("Graph result hasNext: {}", result.hasNext());
+      // Model model = QueryResults.asModel(result);
+      // LOG.error("Size: {}", model.size());
+      // LOG.error("Objects: {}", model.objects());
+
+      if (!result.hasNext() && hasIfEmptyOrNullVendorExtension()) {
+        return Response.status(Status.NOT_FOUND).build();
+      }
+
       GraphEntity entity =
           (GraphEntity) GraphEntity.builder().withSchemaMap(schemaMap).withQueryResult(
               result).withApiDefinitions(swagger).withLdPathNamespaces(swagger).build();
@@ -108,8 +122,12 @@ public final class GetRequestHandler implements Inflector<ContainerRequestContex
 
     Map<String, io.swagger.models.Response> responses = apiOperation.getOperation().getResponses();
     if (responses.containsKey(notFoundStatusCode)) {
+
+      LOG.error("Vendor extensions: {}", responses.get(notFoundStatusCode).getVendorExtensions());
       return responses.get(notFoundStatusCode).getVendorExtensions().containsKey(
           OpenApiSpecificationExtensions.IF_EMPTY_OR_NULL);
+    } else {
+      // geen 404 gespecificeerd
     }
     return false;
   }
