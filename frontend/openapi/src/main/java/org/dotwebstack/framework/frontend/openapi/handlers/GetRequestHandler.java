@@ -7,8 +7,10 @@ import java.util.Map;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import lombok.NonNull;
 import org.dotwebstack.framework.backend.ResultType;
+import org.dotwebstack.framework.frontend.openapi.OpenApiSpecificationExtensions;
 import org.dotwebstack.framework.frontend.openapi.entity.Entity;
 import org.dotwebstack.framework.frontend.openapi.entity.GraphEntity;
 import org.dotwebstack.framework.frontend.openapi.entity.TupleEntity;
@@ -65,9 +67,13 @@ public final class GetRequestHandler implements Inflector<ContainerRequestContex
         informationProduct, requestParameters);
 
     Response responseOk = null;
+
     if (ResultType.TUPLE.equals(informationProduct.getResultType())) {
 
       TupleQueryResult result = (TupleQueryResult) informationProduct.getResult(parameterValues);
+      if (!result.hasNext() && hasIfEmptyOrNullVendorExtension()) {
+        return Response.status(Status.NOT_FOUND).build();
+      }
       TupleEntity entity =
           TupleEntity.builder().withQueryResult(result).withSchemaMap(schemaMap).build();
 
@@ -96,5 +102,17 @@ public final class GetRequestHandler implements Inflector<ContainerRequestContex
     }
     return null;
   }
+
+  private boolean hasIfEmptyOrNullVendorExtension() {
+    String notFoundStatusCode = Integer.toString(Status.NOT_FOUND.getStatusCode());
+
+    Map<String, io.swagger.models.Response> responses = apiOperation.getOperation().getResponses();
+    if (responses.containsKey(notFoundStatusCode)) {
+      return responses.get(notFoundStatusCode).getVendorExtensions().containsKey(
+          OpenApiSpecificationExtensions.IF_EMPTY_OR_NULL);
+    }
+    return false;
+  }
+
 }
 

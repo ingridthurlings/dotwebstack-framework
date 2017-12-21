@@ -27,6 +27,8 @@ public final class OpenApiSpecificationExtensions {
   public static final String EXCLUDE_PROPERTIES_WHEN_EMPTY_OR_NULL =
       DOTWEBSTACK_PREFIX.concat("exclude-properties-when-empty-or-null");
 
+  public static final String IF_EMPTY_OR_NULL = DOTWEBSTACK_PREFIX.concat("if-empty-or-null");
+
   private OpenApiSpecificationExtensions() {
     throw new IllegalStateException(
         String.format("%s is not meant to be instantiated.", OpenApiSpecificationExtensions.class));
