@@ -3,13 +3,21 @@ spring:
     banner-mode: "off"
   jersey:
     type: filter
+  resources:
+    static-locations: file:./config/static/,classpath:/static/
 
-logging:
-  level:
-    ROOT: OFF
+logging.level:
+  org.dotwebstack.framework: DEBUG
+             
 
 dotwebstack:
   config:
-    resourcePath: file:src/test/resources
+    resourcePath: file:./config
     host: localhost
+    linkstrategy: global
     systemGraph: http://dbeerpedia.org#Theatre
+    shacl:
+      uri:
+        result:
+          path: http://www.w3.org/ns/shacl#resultPath
+          message:
